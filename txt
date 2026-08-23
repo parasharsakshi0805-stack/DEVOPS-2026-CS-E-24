@@ -1,0 +1,5 @@
+rxkLUKZOzGoW3GRQ =password
+zxcvqwerty2025_db_user=username
+
+
+mongodb+srv://zxcvqwerty2025_db_user:rxkLUKZOzGoW3GRQ@interview-ai-cluster.zic9afh.mongodb.net/interview-master
