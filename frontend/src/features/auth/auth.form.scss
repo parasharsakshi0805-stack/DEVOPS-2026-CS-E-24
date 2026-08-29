@@ -22,6 +22,7 @@ main{
     .input-group{
         display: flex;
         flex-direction: column;
+
         gap: 0.5rem;
 
 
@@ -32,5 +33,9 @@ main{
             padding-block: 0.75rem;
             border-radius: 0.75rem;
         }
+    }
+    a{
+        color: #e1034d;
+        text-decoration: none;
     }
 }
