@@ -1,49 +1,78 @@
-import react,{useState} from 'react'
-import { useNavigate,Link } from 'react-router'
+import React, { useState } from "react"
+import { Link } from "react-router"
 import "../auth.form.scss"
-import { useAuth } from '../hooks/useAuth'
-import e from 'express'
-
+import { useAuth } from "../hooks/useAuth"
 
 const Login = () => {
-    const {loading,handleLogin}= useAuth()
-    const [email,setEmail]= useState("")
-    const [password,setPassword] = useState("")
+    const { loading, handleLogin } = useAuth()
 
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        handleLogin({email,password})
+
+        handleLogin({
+            email,
+            password
+        })
     }
 
-    if(loading){
-        return (<main><h1>Loading.......</h1></main>)
+    if (loading) {
+        return (
+            <main>
+                <h1>Loading.......</h1>
+            </main>
+        )
     }
-
 
     return (
         <main>
-            <div className='form-container'>
-                <hi>Login</hi>
+            <div className="form-container">
+
+                <h1>Login</h1>
 
                 <form onSubmit={handleSubmit}>
 
                     <div className="input-group">
                         <label htmlFor="email">Email</label>
+
                         <input
-                        onChange={(e)=>{setEmail(e.target.value)}}
-                        type='email' id='email' name='email' placeholder='Enter email address'/>
-                    </div>
-                    <div className="input-group">
-                        <label htmlFor="password">Password</label>
-                        <input 
-                         onChange={(e)=>{setPassword(e.target.value)}}
-                        type='password' id='password' name='password' placeholder='Enter Password'/>
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email}
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter email address"
+                            required
+                        />
                     </div>
 
-                    <button className='button primary-button'>Login</button>
+                    <div className="input-group">
+                        <label htmlFor="password">Password</label>
+
+                        <input
+                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter Password"
+                            required
+                        />
+                    </div>
+
+                    <button className="button primary-button">
+                        Login
+                    </button>
+
                 </form>
-                <p>Don't have an account? <Link to={"/register"} >Register</Link> </p>
+
+                <p>
+                    Don't have an account?{" "}
+                    <Link to="/register">Register</Link>
+                </p>
+
             </div>
         </main>
     )
