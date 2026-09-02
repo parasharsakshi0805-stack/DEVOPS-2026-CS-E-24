@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="9" failures="0" errors="0" time="7.343">
+  <testsuite name="POST /api/auth/register" errors="0" failures="0" skipped="0" timestamp="2026-09-02T05:32:26" time="7.203" tests="9">
+    <testcase classname="POST /api/auth/register registers a new user and returns 201" name="POST /api/auth/register registers a new user and returns 201" time="0.436">
+    </testcase>
+    <testcase classname="POST /api/auth/register rejects registration with missing fields" name="POST /api/auth/register rejects registration with missing fields" time="0.006">
+    </testcase>
+    <testcase classname="POST /api/auth/register rejects duplicate email registration" name="POST /api/auth/register rejects duplicate email registration" time="0.082">
+    </testcase>
+    <testcase classname="POST /api/auth/login logs in with correct credentials" name="POST /api/auth/login logs in with correct credentials" time="0.139">
+    </testcase>
+    <testcase classname="POST /api/auth/login rejects login with wrong password" name="POST /api/auth/login rejects login with wrong password" time="0.17">
+    </testcase>
+    <testcase classname="POST /api/auth/login rejects login for unknown email" name="POST /api/auth/login rejects login for unknown email" time="0.074">
+    </testcase>
+    <testcase classname="GET /api/auth/get-me rejects requests with no token" name="GET /api/auth/get-me rejects requests with no token" time="0.005">
+    </testcase>
+    <testcase classname="GET /api/auth/get-me returns the logged-in user&apos;s details with a valid token" name="GET /api/auth/get-me returns the logged-in user&apos;s details with a valid token" time="0.079">
+    </testcase>
+    <testcase classname="GET /api/auth/logout clears the cookie and blacklists the token" name="GET /api/auth/logout clears the cookie and blacklists the token" time="0.078">
+    </testcase>
+  </testsuite>
+</testsuites>
