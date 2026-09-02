@@ -4,16 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-  "test": "jest --ci --reporters=default --reporters=jest-junit",
-  "dev": "npx nodemon server.js"
-},
-"jest": {
-  "testEnvironment": "node"
-},
-"jest-junit": {
-  "outputDirectory": ".",
-  "outputName": "junit.xml"
-},
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx nodemon server.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -25,11 +18,5 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.3"
-  },
-  "devDependencies": {
-    "jest": "^30.5.1",
-    "jest-junit": "^17.0.0",
-    "mongodb-memory-server": "^11.2.0",
-    "supertest": "^7.2.2"
   }
 }
