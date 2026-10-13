@@ -2,12 +2,15 @@ pipeline {
     agent any
 
     environment {
+        // Pulls the credential you add in Jenkins (ID: mongo-uri) into MONGO_URI
+        // Not strictly needed for the test suite below (it uses an in-memory Mongo),
+        // but kept here for any future integration/e2e stages.
         MONGO_URI   = credentials('mongo-uri')
         JWT_SECRET  = credentials('jwt-secret')
     }
 
     tools {
-        nodejs 'node20'
+        nodejs 'node20' // Configure this name under Manage Jenkins > Tools > NodeJS installations
     }
 
     stages {
@@ -17,29 +20,25 @@ pipeline {
             }
         }
 
-        stage('Install backend dependencies') {
+        stage('Install dependencies') {
             steps {
-                dir('backend') {
-                    sh 'npm ci'
-                }
+                sh 'npm ci'
             }
         }
 
-        stage('Run backend tests') {
+        stage('Run tests') {
             steps {
-                dir('backend') {
-                    sh 'npm test'
-                }
+                sh 'npm test'
             }
         }
     }
 
     post {
         always {
-            junit testResults: 'backend/junit.xml', allowEmptyResults: true
+            junit testResults: 'junit.xml', allowEmptyResults: true
         }
         failure {
-            echo 'Backend tests failed - check the JUnit report and console output above.'
+            echo 'Tests failed - check the JUnit report and console output above.'
         }
     }
 }
