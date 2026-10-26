@@ -13,7 +13,7 @@ const Register = () => {
 
     const handleSubmit = async(e) => {
         e.preventDefault()
-        await handleLogin({email,password})
+        await handleRegister({email,password})
         navigate('/')
     }
     if(loading){
@@ -23,7 +23,7 @@ const Register = () => {
     return (
         <main>
             <div className='form-container'>
-                <hi>Register</hi>
+                <h1>Register</h1>
 
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">

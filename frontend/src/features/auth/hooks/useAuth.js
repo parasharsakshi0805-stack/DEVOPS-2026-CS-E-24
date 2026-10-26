@@ -38,15 +38,18 @@ const handleLogout = async () => {
     }catch(err){
 
     }finally{
-    setLoading(dalse)
+    setLoading(false)
     }
 }
   useEffect(()=>{
         const getAndSetUser=async()=>{
+            try{
             const data = await getMe()
             setUser(data.user)
+            }catch(err){ } finally{
             setLoading(false)
         }
+    }
         getAndSetUser()
     }
     ,[])
