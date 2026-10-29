@@ -1,60 +1,109 @@
-import react, { useState } from 'react'
-import { useNavigate,Link } from 'react-router'
-import { useAuth } from '../hooks/useAuth'
+
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router';
+import { useAuth } from '../hooks/useAuth';
 
 const Register = () => {
+    const navigate = useNavigate();
 
-    const navigate = useNavigate()
-    const [username, setUsername] = useState("")
-    const [email,setEmail]= useState("")
-    const [Password, setPassword] = useState("")
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
-    const { loading,handleRegister}=  useAuth()
+    const { loading, handleRegister } = useAuth();
 
-    const handleSubmit = async(e) => {
-        e.preventDefault()
-        await handleRegister({email,password})
-        navigate('/')
-    }
-    if(loading){
-        return(<main><h1>Loading.......</h1></main>)
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            // Send all three fields to the backend
+            await handleRegister({
+                username,
+                email,
+                password
+            });
+
+            navigate('/');
+        } catch (error) {
+            console.error('Registration failed:', error);
+        }
+    };
+
+    if (loading) {
+        return (
+            <main>
+                <h1>Loading...</h1>
+            </main>
+        );
     }
 
     return (
         <main>
-            <div className='form-container'>
+            <div className="form-container">
                 <h1>Register</h1>
 
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">
                         <label htmlFor="username">Username</label>
                         <input
-                        onChange={(e)=>{setUsername(e.target.value)}}
-                         
-                         
-                        type='text' id='username' name='username' placeholder='Enter email address' />
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Enter username"
+                            value={username}
+                            onChange={(e) =>
+                                setUsername(e.target.value)
+                            }
+                            required
+                        />
                     </div>
 
                     <div className="input-group">
                         <label htmlFor="email">Email</label>
                         <input
-                        onChange={(e)=>{setEmail(e.target.value)}}
-                        type='email' id='email' name='email' placeholder='Enter email address' />
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter email address"
+                            value={email}
+                            onChange={(e) =>
+                                setEmail(e.target.value)
+                            }
+                            required
+                        />
                     </div>
 
                     <div className="input-group">
                         <label htmlFor="password">Password</label>
                         <input
-                         onChange={(e)=>{setPassword(e.target.value)}}
-                        type='password' id='password' name='password' placeholder='Enter Password' />
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter password"
+                            value={password}
+                            onChange={(e) =>
+                                setPassword(e.target.value)
+                            }
+                            required
+                        />
                     </div>
 
-                    <button className='button primary-button'>Register</button>
+                    <button
+                        type="submit"
+                        className="button primary-button"
+                        disabled={loading}
+                    >
+                        Register
+                    </button>
                 </form>
-               <p>Already have an account? <Link to={"/login"} >Login</Link> </p> 
+
+                <p>
+                    Already have an account?{' '}
+                    <Link to="/login">Login</Link>
+                </p>
             </div>
         </main>
-    )
-}
+    );
+};
 
-export default Register
+export default Register;
