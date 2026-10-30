@@ -59,7 +59,9 @@ function normalizeInterviewReport(data, jobTitle) {
 
     // Convert technical questions into objects
     const technicalQuestions = (
-        data.technicalQuestions || []
+        Array.isArray(data.technicalQuestions)
+            ? data.technicalQuestions
+            : []
     ).map((item) => {
 
         if (typeof item === "string") {
@@ -70,13 +72,27 @@ function normalizeInterviewReport(data, jobTitle) {
             };
         }
 
-        return item;
+        if (!item || typeof item !== "object" || Array.isArray(item)) {
+            return {
+                question: String(item ?? "Technical question"),
+                intention: "To evaluate technical knowledge.",
+                answer: "Explain the concept clearly and give a practical example."
+            };
+        }
+
+        return {
+            question: String(item.question || "Technical question"),
+            intention: String(item.intention || "To evaluate technical knowledge."),
+            answer: String(item.answer || "Explain the concept clearly with an example.")
+        };
     });
 
 
     // Convert behavioral questions into objects
     const behavioralQuestions = (
-        data.behavioralQuestions || []
+        Array.isArray(data.behavioralQuestions)
+            ? data.behavioralQuestions
+            : []
     ).map((item) => {
 
         if (typeof item === "string") {
@@ -87,13 +103,27 @@ function normalizeInterviewReport(data, jobTitle) {
             };
         }
 
-        return item;
+        if (!item || typeof item !== "object" || Array.isArray(item)) {
+            return {
+                question: String(item ?? "Behavioral question"),
+                intention: "To evaluate communication and problem-solving skills.",
+                answer: "Use the STAR method: Situation, Task, Action and Result."
+            };
+        }
+
+        return {
+            question: String(item.question || "Behavioral question"),
+            intention: String(item.intention || "To evaluate communication skills."),
+            answer: String(item.answer || "Use the STAR method to structure your answer.")
+        };
     });
 
 
     // Convert skill gaps into objects
     const skillGaps = (
-        data.skillGaps || []
+        Array.isArray(data.skillGaps)
+            ? data.skillGaps
+            : []
     ).map((item) => {
 
         if (typeof item === "string") {
@@ -103,31 +133,75 @@ function normalizeInterviewReport(data, jobTitle) {
             };
         }
 
-        return item;
+        if (!item || typeof item !== "object" || Array.isArray(item)) {
+            return {
+                skill: String(item ?? "Additional skill"),
+                severity: "medium"
+            };
+        }
+
+        const severity = ["low", "medium", "high"].includes(
+            String(item.severity).toLowerCase()
+        )
+            ? String(item.severity).toLowerCase()
+            : "medium";
+
+        return {
+            skill: String(item.skill || "Additional skill"),
+            severity
+        };
     });
 
 
-    // Convert preparation plan into objects
+    // Convert preparation plan into valid objects
     const preparationPlan = (
-        data.preparationPlan || []
+        Array.isArray(data.preparationPlan)
+            ? data.preparationPlan
+            : []
     ).map((item, index) => {
 
-        if (typeof item === "string") {
+        // Handle numbers, strings, null and invalid values
+        if (
+            typeof item !== "object" ||
+            item === null ||
+            Array.isArray(item)
+        ) {
+
+            const focus = String(
+                item ?? `Preparation Topic ${index + 1}`
+            );
+
             return {
                 day: index + 1,
-                focus: item,
+                focus,
                 tasks: [
-                    `Study ${item}`,
-                    `Practice questions related to ${item}`,
-                    `Revise the important concepts of ${item}`
+                    `Study ${focus}`,
+                    `Practice questions related to ${focus}`,
+                    `Revise important concepts of ${focus}`
                 ]
             };
         }
 
-        return item;
+        // Handle object values
+        return {
+
+            day: Number(item.day) > 0
+                ? Number(item.day)
+                : index + 1,
+
+            focus: String(
+                item.focus || `Preparation Topic ${index + 1}`
+            ),
+
+            tasks: Array.isArray(item.tasks)
+                ? item.tasks.map(task => String(task))
+                : []
+
+        };
     });
 
 
+    // Return normalized report
     return {
 
         ...data,
@@ -161,16 +235,22 @@ async function generateInterviewReport({
 
     try {
 
+        // Check API key
         if (!process.env.GOOGLE_GENAI_API_KEY) {
-            throw new Error("GOOGLE_GENAI_API_KEY is missing from .env file.");
+            throw new Error(
+                "GOOGLE_GENAI_API_KEY is missing from .env file."
+            );
         }
 
+        // Validate required inputs
         if (!title || !jobDescription || !resume) {
             throw new Error(
                 "Job title, job description and resume are required."
             );
         }
 
+
+        // Gemini prompt
         const prompt = `
 You are an expert technical interviewer and career coach.
 
@@ -194,28 +274,38 @@ IMPORTANT INSTRUCTIONS:
 2. Do not return Markdown or code fences.
 3. The title must be "${title}".
 4. matchScore must be a number between 0 and 100.
+
 5. technicalQuestions must be an array of objects.
    Each object must contain:
-   - question
-   - intention
-   - answer
+   - question: string
+   - intention: string
+   - answer: string
 
 6. behavioralQuestions must be an array of objects.
    Each object must contain:
-   - question
-   - intention
-   - answer
+   - question: string
+   - intention: string
+   - answer: string
 
 7. skillGaps must be an array of objects.
    Each object must contain:
-   - skill
-   - severity (low, medium, or high)
+   - skill: string
+   - severity: low, medium, or high
 
 8. preparationPlan must be an array of objects.
    Each object must contain:
-   - day (number)
-   - focus
-   - tasks (array of strings)
+   - day: number
+   - focus: string
+   - tasks: array of strings
+
+IMPORTANT PREPARATION PLAN RULES:
+- Never return preparationPlan as an array of numbers.
+- Never return preparationPlan as an array of strings.
+- Every preparationPlan item MUST be an object.
+- Every object MUST contain day, focus, and tasks.
+- day MUST be a number.
+- focus MUST be a string.
+- tasks MUST be an array of strings.
 
 9. Generate at least:
    - 6 technical questions
@@ -232,7 +322,11 @@ IMPORTANT INSTRUCTIONS:
 12. Give practical answers and actionable improvement tasks.
 `;
 
-        // Call Gemini
+
+        // ======================================
+        // CALL GEMINI
+        // ======================================
+
         const response = await ai.models.generateContent({
 
             model: "gemini-3-flash-preview",
@@ -252,15 +346,20 @@ IMPORTANT INSTRUCTIONS:
         });
 
 
-        // Check response
+        // Check Gemini response
         if (!response || !response.text) {
-            throw new Error("Gemini returned an empty response.");
+            throw new Error(
+                "Gemini returned an empty response."
+            );
         }
 
         console.log("Gemini response received successfully.");
 
 
-        // Parse JSON response
+        // ======================================
+        // PARSE JSON RESPONSE
+        // ======================================
+
         let parsedData;
 
         try {
@@ -280,14 +379,32 @@ IMPORTANT INSTRUCTIONS:
         }
 
 
-        // Normalize response
+        // Check parsed data
+        if (
+            !parsedData ||
+            typeof parsedData !== "object" ||
+            Array.isArray(parsedData)
+        ) {
+            throw new Error(
+                "Gemini returned an invalid interview report."
+            );
+        }
+
+
+        // ======================================
+        // NORMALIZE RESPONSE
+        // ======================================
+
         const normalizedData = normalizeInterviewReport(
             parsedData,
             title
         );
 
 
-        // Validate response using Zod
+        // ======================================
+        // VALIDATE RESPONSE USING ZOD
+        // ======================================
+
         const validatedData = interviewReportSchema.safeParse(
             normalizedData
         );
@@ -305,7 +422,9 @@ IMPORTANT INSTRUCTIONS:
         }
 
 
-        console.log("Interview report generated and validated successfully.");
+        console.log(
+            "Interview report generated and validated successfully."
+        );
 
         return validatedData.data;
 
@@ -381,6 +500,7 @@ async function generateResumePdf({
             html: z.string()
         });
 
+
         const prompt = `
 You are a professional resume writer.
 
@@ -409,6 +529,8 @@ REQUIREMENTS:
 9. Do not include unnecessary graphics or tables.
 `;
 
+
+        // Call Gemini
         const response = await ai.models.generateContent({
 
             model: "gemini-3-flash-preview",
@@ -428,18 +550,38 @@ REQUIREMENTS:
         });
 
 
+        // Check response
         if (!response || !response.text) {
-            throw new Error("Gemini returned an empty resume response.");
+            throw new Error(
+                "Gemini returned an empty resume response."
+            );
         }
 
 
-        const jsonContent = JSON.parse(response.text);
+        // Parse response
+        let jsonContent;
+
+        try {
+
+            jsonContent = JSON.parse(response.text);
+
+        } catch (parseError) {
+
+            console.error(
+                "Resume JSON Parsing Error:",
+                parseError.message
+            );
+
+            throw new Error(
+                "Gemini returned invalid resume JSON."
+            );
+        }
 
 
+        // Validate resume response
         const validatedResume = resumePdfSchema.safeParse(
             jsonContent
         );
-
 
         if (!validatedResume.success) {
 
